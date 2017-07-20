@@ -8,7 +8,7 @@ FITNESS_FUNC_KEY = "?get_reward@BackTesting@GPQuant@@SANPEAHPEANH1HH@Z"
 CHEAT_FUNC_KEY = "?cheating@BackTesting@GPQuant@@SAPEANPEAHPEANH1HH@Z"
 DATA_PATH = "./data/demo.csv"
 
-MODEL_NAME = "1500520500"
+MODEL_NAME = "1500535267"
 
 
 def test_bar(y_pred):

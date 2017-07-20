@@ -80,6 +80,8 @@ class YCCanvas:
 
         self.sub_canvas_exist = dict()
 
+        self.sub_canvas_color_ctr = dict()
+
     @staticmethod
     def ax_draw_line(ax, k, b, line=None):
         """
@@ -211,18 +213,25 @@ class YCCanvas:
 
         if sub_canvas_id not in self.sub_canvas_exist:
             self.sub_canvas_exist[sub_canvas_id] = self.figure.add_subplot(self.shape[0], self.shape[1], sub_canvas_id)
+            self.sub_canvas_color_ctr[sub_canvas_id] = 0
         # else:
         #     pass
         #     print("sub_canvas_id exists!! By default, the old canvas will not be removed")
 
         return self.sub_canvas_exist[sub_canvas_id]
 
-    def draw_line_chart_2d(self, x_data, y_data, sub_canvas_id=1, need_xticks=False, color="#03A9F4",
+    def draw_line_chart_2d(self, x_data, y_data, sub_canvas_id=1, need_xticks=False, color=None,
                            label=None,
                            tick_color="black",
                            line_style="dashed"):
 
         ax = self.add_canvas(sub_canvas_id)
+
+        if color is None:
+            c_ctr = self.sub_canvas_color_ctr[sub_canvas_id]
+            color = self.__shuffle_colors[c_ctr]
+            self.sub_canvas_color_ctr[sub_canvas_id] += 1
+
         ax.plot(x_data, y_data, color=color, linestyle=line_style, label=label)
         ax.tick_params(axis='y', colors=tick_color)
 
@@ -231,8 +240,15 @@ class YCCanvas:
 
         return ax
 
-    def draw_line_chart_2d_twin(self, x_data, y_data, ax, need_xticks=False, color="#03A9F4", tick_color="black",
+    def draw_line_chart_2d_twin(self, x_data, y_data, sub_canvas_id, need_xticks=False, color=None, tick_color="black",
                                 line_style="dashed"):
+
+        ax = self.add_canvas(sub_canvas_id)
+
+        if color is None:
+            c_ctr = self.sub_canvas_color_ctr
+            color = self.__shuffle_colors[c_ctr]
+            self.sub_canvas_color_ctr += 1
 
         twin_ax = ax.twinx()
         twin_ax.plot(x_data, y_data, color=color, linestyle=line_style)

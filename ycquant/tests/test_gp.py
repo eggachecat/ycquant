@@ -26,7 +26,7 @@ def test_best_result(y, y_pred):
 x_data, price_table = read_unsupervised_data(DATA_PATH)
 metric = YCFitness(FITNESS_FUNC_KEY, path_to_lib=PATH_TO_DLL)
 gp = YCGP(price_table, metric)
-gp.set_params(population_size=1000, generations=20, stopping_criteria=20000)
+gp.set_params(population_size=1000, generations=20, stopping_criteria=20000, parsimony_coefficient=100)
 gp.fit(x_data)
 
 y = np.arange(x_data.shape[0])

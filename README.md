@@ -12,6 +12,7 @@ changing the code block start at line 472 from:
 
 ```python
     if isinstance(self, RegressorMixin):
+        # Find the best individual in the final generation
         self._program = self._programs[-1][np.argmin(fitness)]
 ```
 

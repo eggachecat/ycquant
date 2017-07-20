@@ -8,6 +8,8 @@ import numpy as np
 import pydotplus
 import os
 
+from ycquant.yc_interpreter import *
+
 
 class YCGP:
     """
@@ -125,6 +127,7 @@ class YCGP:
 
         model_path = "{fd}/model.pkl".format(fd=folder_path)
         plot_path = "{fd}/expression.png".format(fd=folder_path)
+        formula_path = "{fd}/formula.txt".format(fd=folder_path)
 
         best_program = self.est_gp._program
         graph = pydotplus.graphviz.graph_from_dot_data(best_program.export_graphviz())
@@ -133,6 +136,12 @@ class YCGP:
         best_program.metric = None
         with open(model_path, "wb") as f:
             cPickle.dump(best_program, f)
+
+        # save as mc_formula
+        formula = best_program.__str__()
+        mc_formula = YCInterpreter.mc_interprete(formula)
+        with open(formula_path, "w") as f:
+            f.write(mc_formula)
 
     @staticmethod
     def load(folder_path):
