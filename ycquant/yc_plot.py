@@ -352,6 +352,7 @@ class YCCanvas:
         self.figure.show()
         plt.show()
 
-    def save(self, filename, sub_canvas_id=1):
+    def save(self, filename, close_image=False):
         self.figure.savefig(filename)
-        plt.close(self.figure)
+        if close_image:
+            plt.close(self.figure)

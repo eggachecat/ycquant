@@ -5,6 +5,8 @@ from gplearn.genetic import SymbolicRegressor
 from gplearn.fitness import make_fitness
 
 import numpy as np
+import pydotplus
+import os
 
 
 class YCGP:
@@ -110,26 +112,42 @@ class YCGP:
 
         return self.est_gp.predict(x_data)
 
-    def save(self, file_path):
+    def save(self, folder_path):
         """Due to pickle not supporting saving ctype,
               so we have to save the best program  without metric function rather than whole regressor
 
-          :param file_path: str
+          :param folder_path: str
                 where to save the best est
           """
-        self.est_gp._program.metric = None
-        with open(file_path, "wb") as f:
-            cPickle.dump(self.est_gp._program, f)
+
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        model_path = "{fd}/model.pkl".format(fd=folder_path)
+        plot_path = "{fd}/expression.png".format(fd=folder_path)
+
+        best_program = self.est_gp._program
+        graph = pydotplus.graphviz.graph_from_dot_data(best_program.export_graphviz())
+        graph.write_png(plot_path)
+
+        best_program.metric = None
+        with open(model_path, "wb") as f:
+            cPickle.dump(best_program, f)
 
     @staticmethod
-    def load(file_path):
+    def load(folder_path):
         """
 
-        :param file_path:  str
+        :param folder_path:  str
                 where to save the best est
         :return: program
             program.execute(x_data) to get the predict
         """
-        with open(file_path, "rb") as f:
+
+        if not os.path.exists(folder_path):
+            print("Folder: {fd} not exists!!".format(fd=folder_path))
+        model_path = "{fd}/model.pkl".format(fd=folder_path)
+
+        with open(model_path, "rb") as f:
             model = cPickle.load(f)
         return model

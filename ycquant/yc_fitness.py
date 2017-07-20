@@ -34,3 +34,5 @@ class YCFitness:
 
     def evluate(self, *args):
         return self._execute(self.evluate_func, *args)
+
+
