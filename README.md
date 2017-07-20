@@ -1,18 +1,23 @@
+Welcome to ycquant!
+===================
 
-#Important
+
+Info
+-----------
+## Important
 
 Please modify gentic.py in gplearn as follows:
 
 changing the code block start at line 472 from:
 
-'''Python
+```python
     if isinstance(self, RegressorMixin):
         self._program = self._programs[-1][np.argmin(fitness)]
-'''
+```
 
 to:
 
-'''Python
+```python
     if isinstance(self, RegressorMixin):
         # Find the best individual in the final generation
         if self._metric.greater_is_better:
@@ -20,4 +25,4 @@ to:
         else:
             self._program = self._programs[-1][np.argmin(fitness)]
 
-'''
+```
