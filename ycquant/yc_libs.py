@@ -9,24 +9,3 @@ YC_FUNC_KEY_GET_REWARD = "?get_reward@BarStrategy@BackTesting@GPQuant@@SANPEAHPE
 YC_FUNC_KEY_GET_OP_ARR = "?get_op_arr@BarStrategy@BackTesting@GPQuant@@SAPEANPEANH@Z"
 
 
-class YCLibs:
-    def __init__(self):
-        pass
-
-    dll =  ctypes.cdll.LoadLibrary(path_to_lib)
-
-    @staticmethod
-    def get_info():
-        return
-
-    @staticmethod
-    def get_info_by_op():
-        return
-
-    @staticmethod
-    def get_reward():
-        return
-
-    @staticmethod
-    def get_op_reward():
-        return
