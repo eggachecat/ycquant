@@ -301,6 +301,45 @@ class YCCanvas:
 
         return ax
 
+    def draw_steam(self, x_data, y_data, sub_canvas_id=1, need_xticks=False, color=None,
+                   label=None,
+                   tick_color="black",
+                   line_style="dashed"):
+
+        ax = self.add_canvas(sub_canvas_id)
+
+        if color is None:
+            c_ctr = self.sub_canvas_color_ctr[sub_canvas_id]
+            color = self.__shuffle_colors[c_ctr]
+            self.sub_canvas_color_ctr[sub_canvas_id] += 1
+
+        ax.stem(x_data, y_data, color=color, linestyle=line_style, label=label, markerfmt=' ')
+        ax.tick_params(axis='y', colors=tick_color)
+
+        if need_xticks:
+            ax.set_xticks(x_data)
+
+        return ax
+
+    def draw_square_function(self, y_series, sub_canvas_id=1, need_xticks=False, color=None,
+                             label=None,
+                             tick_color="black"):
+
+        ax = self.add_canvas(sub_canvas_id)
+
+        if color is None:
+            c_ctr = self.sub_canvas_color_ctr[sub_canvas_id]
+            color = self.__shuffle_colors[c_ctr]
+            self.sub_canvas_color_ctr[sub_canvas_id] += 1
+
+        ax.plot(y_series, color=color, drawstyle='steps-pre', label=label)
+        ax.tick_params(axis='y', colors=tick_color)
+
+        if need_xticks:
+            ax.set_xticks(range(len(y_series)))
+
+        return ax
+
     def draw_neuron_lines(self, neuron_matrix, sub_canvas_id=1):
         """
 

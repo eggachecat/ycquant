@@ -4,11 +4,10 @@ from ycquant.yc_gp import *
 from ycquant.yc_io import *
 
 PATH_TO_DLL = "D:/sunao/workspace/cpp/GPQuant/x64/Release/GPQuant.dll"
-FITNESS_FUNC_KEY = "?get_reward@BackTesting@GPQuant@@SANPEAHPEANH1HH@Z"
-CHEAT_FUNC_KEY = "?cheating@BackTesting@GPQuant@@SAPEANPEAHPEANH1HH@Z"
+CHEAT_FUNC_KEY = "?get_info@BarStrategy@BackTesting@GPQuant@@SAPEAUstrategy_info@3@PEAHPEANH1HH@Z"
 DATA_PATH = "./data/demo.csv"
 
-MODEL_NAME = "1500535267"
+MODEL_NAME = "1500607339"
 
 
 def test_bar(y_pred):
@@ -16,31 +15,33 @@ def test_bar(y_pred):
 
     bm = YCBenchmark(CHEAT_FUNC_KEY, path_to_lib=PATH_TO_DLL)
 
-    benchmark_profit_arr = bm.bar_evaluate(price_table)
-    benchmark_cum_arr = np.cumsum(benchmark_profit_arr)
+    benchmark_info = bm.bar_evaluate(price_table)
+    benchmark_cum_arr = np.cumsum(benchmark_info["profit_arr"])
 
-    predict_profit_arr = bm.bar_evaluate(price_table, y_pred)
-    predict_cum_arr = np.cumsum(predict_profit_arr)
+    predict_info = bm.bar_evaluate(price_table, y_pred)
+    predict_cum_arr = np.cumsum(predict_info["profit_arr"])
 
-    canvas = YCCanvas(shape=(2, 1))
+    canvas = YCCanvas(shape=(3, 2))
 
-    canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), benchmark_profit_arr, color="blue", label="benchmark",
-                              line_style="solid", sub_canvas_id=1)
-    canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), predict_profit_arr, color="red", label="algorithm",
-                              sub_canvas_id=1)
+    canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), benchmark_info["profit_arr"], color="black", label="benchmark", sub_canvas_id=1)
+    canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), predict_info["profit_arr"], color="red", label="algorithm", sub_canvas_id=1)
 
-    canvas.set_x_label("Indices", sub_canvas_id=1)
     canvas.set_y_label("Profit", sub_canvas_id=1)
-    canvas.set_legend(sub_canvas_id=1)
+    canvas.set_title("In-sample Summary", sub_canvas_id=1)
 
-    canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), benchmark_cum_arr, color="blue", label="benchmark",
-                              line_style="solid", sub_canvas_id=2)
+    canvas.draw_square_function(benchmark_info["op_arr"], color="black", label="benchmark", sub_canvas_id=3)
+    canvas.draw_square_function(predict_info["op_arr"], color="red", label="algorithm", sub_canvas_id=3)
+
+    canvas.set_y_label("Decision", sub_canvas_id=3)
+
+    canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), benchmark_cum_arr, color="black", label="benchmark",
+                              line_style="solid", sub_canvas_id=5)
     canvas.draw_line_chart_2d(range(1, 1 + len(price_table)), predict_cum_arr, color="red", label="algorithm",
-                              sub_canvas_id=2)
+                              sub_canvas_id=5)
 
-    canvas.set_x_label("Indices", sub_canvas_id=2)
-    canvas.set_y_label("Accumlated Profit", sub_canvas_id=2)
-    canvas.set_legend(sub_canvas_id=2)
+    canvas.set_x_label("Time", sub_canvas_id=5)
+    canvas.set_y_label("Accumlated Profit", sub_canvas_id=5)
+    canvas.set_legend(sub_canvas_id=5)
 
     canvas.froze()
 

@@ -6,7 +6,12 @@ Info
 -----------
 ## Important
 
-Please modify gentic.py in gplearn as follows:
+Simply install
+> pip install git+git://github.com/eggachecat/YCgplearn.git
+
+
+
+Modified gentic.py in gplearn as follows:
 
 changing the code block start at line 472 from:
 

@@ -7,8 +7,8 @@ import time
 ts = int(time.time())
 
 PATH_TO_DLL = "D:/sunao/workspace/cpp/GPQuant/x64/Release/GPQuant.dll"
-FITNESS_FUNC_KEY = "?get_reward@BackTesting@GPQuant@@SANPEAHPEANH1HH@Z"
-DATA_PATH = "./data/demo.csv"
+FITNESS_FUNC_KEY = "?get_reward@BarStrategy@BackTesting@GPQuant@@SANPEAHPEANH1HH@Z"
+DATA_PATH = "./data/demo_data"
 
 
 def test_best_result(y, y_pred):
@@ -26,7 +26,7 @@ def test_best_result(y, y_pred):
 x_data, price_table = read_unsupervised_data(DATA_PATH)
 metric = YCFitness(FITNESS_FUNC_KEY, path_to_lib=PATH_TO_DLL)
 gp = YCGP(price_table, metric)
-gp.set_params(population_size=1000, generations=20, stopping_criteria=20000, parsimony_coefficient=100)
+gp.set_params(population_size=10, generations=2, stopping_criteria=2000, parsimony_coefficient=0.1, max_samples=1.0)
 gp.fit(x_data)
 
 y = np.arange(x_data.shape[0])
@@ -34,8 +34,9 @@ y = np.arange(x_data.shape[0])
 y_pred = gp.predict(x_data)
 test_best_result(y, y_pred)
 
+print("experiment:　{ts}".format(ts=ts))
+
 gp.save("outputs/exp_{suf}".format(suf=ts))
 prog = gp.load("outputs/exp_{suf}".format(suf=ts))
-print("-------------------")
 y_pred = prog.execute(x_data)
 test_best_result(y, y_pred)

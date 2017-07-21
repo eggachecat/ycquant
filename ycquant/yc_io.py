@@ -15,10 +15,16 @@ def convert_price_to_binary(price_table):
     """
 
     price_table_lag = np.insert(price_table, [0], price_table[0])
-    diff = price_table_lag[:len(price_table)] - price_table
+    # src:  [p_1, p_2, p_3]
+    # lag:  [p_1, p_1, p_2]
+    #       [0, p_2-p_1, p_3-p_2]
 
-    binary_vector = diff[diff > 0]
-    pass
+    binary_vector = price_table - price_table_lag[:len(price_table)]
+
+    binary_vector[binary_vector > 0] = 1
+    binary_vector[binary_vector < 0] = 0
+
+    return binary_vector[1:].astype(int)
 
 
 def read_unsupervised_data(data_path):
@@ -44,7 +50,9 @@ def read_classification_data(data_path):
     """
     x_data, price = read_unsupervised_data(data_path)
 
-    return x_data, price
+    return x_data[:len(price) - 1], convert_price_to_binary(price)
+
+
 
 
 def save_data_to(obj, file):

@@ -1,14 +1,14 @@
 import ctypes
 import _pickle as cPickle
 
-from gplearn.genetic import SymbolicRegressor
-from gplearn.fitness import make_fitness
+from YCgplearn.genetic import SymbolicRegressor
+from YCgplearn.fitness import make_fitness
 
 import numpy as np
 import pydotplus
-import os
 
 from ycquant.yc_interpreter import *
+import os
 
 
 class YCGP:
@@ -35,7 +35,8 @@ class YCGP:
         self.metric = metric
 
         self.explict_fiteness_func = self.make_explict_func()
-        self.est_gp = None
+        self.est = None
+        self.max_samples = 1.0
 
     def make_explict_func(self):
         n_dim = self.n_dim
@@ -57,23 +58,24 @@ class YCGP:
             :param sample_weight:
             :return:
             """
+
             y_pred[y_pred == 0] = 1
 
             bool_sample_weight = np.array(sample_weight, dtype=bool)
             indices = y[bool_sample_weight]
+            indices = indices - indices[0]
             y_pred_arr = y_pred[bool_sample_weight]
 
             indices_pointer = indices.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
             y_pred_arr_pointer = y_pred_arr.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
             result = reward_func(indices_pointer, y_pred_arr_pointer, len(indices), price_table_ptr, n_dim, 0)
-
             return result
 
         return explicit_fitness
 
     def set_params(self, population_size=500, generations=10, stopping_criteria=10, p_crossover=0.7, p_subtree_mutation=0.1,
-                   p_hoist_mutation=0.05, p_point_mutation=0.1, verbose=1, parsimony_coefficient=0.01, function_set=None):
+                   p_hoist_mutation=0.05, p_point_mutation=0.1, verbose=1, parsimony_coefficient=0.01, function_set=None, max_samples=1.0):
 
         self.population_size = population_size
         self.generations = generations
@@ -84,6 +86,7 @@ class YCGP:
         self.p_point_mutation = p_point_mutation
         self.verbose = verbose
         self.parsimony_coefficient = parsimony_coefficient
+        self.max_samples = max_samples
 
         if function_set is None:
             function_set = ['add', 'sub', 'mul', 'div', 'sin']
@@ -98,23 +101,26 @@ class YCGP:
 
         metric = make_fitness(self.explict_fiteness_func, True)
 
-        self.est_gp = SymbolicRegressor(population_size=self.population_size,
-                                        generations=self.generations, stopping_criteria=self.stopping_criteria,
-                                        p_crossover=self.p_crossover, p_subtree_mutation=self.p_subtree_mutation,
-                                        p_hoist_mutation=self.p_hoist_mutation, p_point_mutation=self.p_point_mutation,
-                                        metric=metric,
-                                        function_set=self.function_set,
-                                        verbose=self.verbose, parsimony_coefficient=self.parsimony_coefficient)
+        # here the random_state is set to be 223 to ensure
+        # the cut-split not the sampling split
 
-        self.est_gp.fit(x_data, np.arange(x_data.shape[0]))
+        self.est = SymbolicRegressor(population_size=self.population_size,
+                                     generations=self.generations, stopping_criteria=self.stopping_criteria,
+                                     p_crossover=self.p_crossover, p_subtree_mutation=self.p_subtree_mutation,
+                                     p_hoist_mutation=self.p_hoist_mutation, p_point_mutation=self.p_point_mutation,
+                                     metric=metric, max_samples=self.max_samples,
+                                     function_set=self.function_set,
+                                     verbose=self.verbose, parsimony_coefficient=self.parsimony_coefficient)
 
-        return self.est_gp
+        self.est.fit(x_data, np.arange(x_data.shape[0]))
+
+        return self.est
 
     def predict(self, x_data):
 
-        return self.est_gp.predict(x_data)
+        return self.est.predict(x_data)
 
-    def save(self, folder_path):
+    def save(self, folder_path, to_save_generation=True):
         """Due to pickle not supporting saving ctype,
               so we have to save the best program  without metric function rather than whole regressor
 
@@ -127,9 +133,9 @@ class YCGP:
 
         model_path = "{fd}/model.pkl".format(fd=folder_path)
         plot_path = "{fd}/expression.png".format(fd=folder_path)
-        formula_path = "{fd}/formula.txt".format(fd=folder_path)
+        formula_path = "{fd}/mc_formula.txt".format(fd=folder_path)
 
-        best_program = self.est_gp._program
+        best_program = self.est._program
         graph = pydotplus.graphviz.graph_from_dot_data(best_program.export_graphviz())
         graph.write_png(plot_path)
 
@@ -141,7 +147,22 @@ class YCGP:
         formula = best_program.__str__()
         mc_formula = YCInterpreter.mc_interprete(formula)
         with open(formula_path, "w") as f:
-            f.write(mc_formula)
+            f.write("f[1]=" + mc_formula + ";")
+
+        if to_save_generation:
+            self.save_generation("{fd}/generation.pkl".format(fd=folder_path))
+
+    def save_generation(self, generation_path):
+
+        _programs = self.est._programs[0]
+        __programs = []
+        for _program in _programs:
+            if not _program is None:
+                _program.metric = None
+                __programs.append(_program)
+
+        with open(generation_path, "wb") as f:
+            cPickle.dump(__programs, f)
 
     @staticmethod
     def load(folder_path):
