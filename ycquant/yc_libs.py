@@ -51,9 +51,12 @@ class CrossBarStrategy:
 
 fillprototype(getattr(libyc, YC_FUNC_KEY_GET_INFO), POINTER(StrategyInfo),
               [POINTER(c_int), POINTER(c_double), c_int, POINTER(c_double), c_int, c_int])
+
 fillprototype(getattr(libyc, YC_FUNC_KEY_GET_INFO_BY_OP), POINTER(StrategyInfo),
               [POINTER(c_int), POINTER(c_double), c_int, POINTER(c_double), c_int, c_int])
+
 fillprototype(getattr(libyc, YC_FUNC_KEY_GET_REWARD), c_double,
               [POINTER(c_int), POINTER(c_double), c_int, POINTER(c_double), c_int, c_int])
+
 fillprototype(getattr(libyc, YC_FUNC_KEY_GET_OP_ARR), POINTER(c_double),
               [POINTER(c_double), c_int])

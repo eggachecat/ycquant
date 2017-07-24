@@ -1,4 +1,3 @@
-import ctypes
 import _pickle as cPickle
 
 from YCgplearn.genetic import SymbolicRegressor
@@ -10,6 +9,8 @@ import pydotplus
 from ycquant.yc_interpreter import *
 import os
 
+from ctypes import *
+
 
 class YCGP:
     """
@@ -17,7 +18,7 @@ class YCGP:
     which is able to handle changing target during the training (like reinforcement learning)
     """
 
-    def __init__(self, price_table, metric, n_dim=0):
+    def __init__(self, price_table, metric, n_dim=0, n_split=None):
         """
 
         :param n_dim: int, default 0
@@ -28,9 +29,15 @@ class YCGP:
             will be used to evaluate the fitenss
 
         """
+
+        if n_split is None:
+            n_split = [0, len(price_table)]
+
+        self.n_split = n_split
+
         self.n_dim = n_dim
         self.price_table = price_table
-        self.price_table_ptr = self.price_table.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+        self.price_table_ptr = self.price_table.ctypes.data_as(POINTER(c_double))
         self.len_price_table = len(price_table)
         self.metric = metric
 
@@ -40,8 +47,9 @@ class YCGP:
 
     def make_explict_func(self):
         n_dim = self.n_dim
-        price_table_ptr = self.price_table_ptr
         reward_func = self.metric.get_reward
+        n_split = self.n_split
+        price_table = self.price_table
 
         def explicit_fitness(y, y_pred, sample_weight):
             """
@@ -58,18 +66,33 @@ class YCGP:
             :param sample_weight:
             :return:
             """
+            print("fuck off")
 
             y_pred[y_pred == 0] = 1
+            # bool_sample_weight = np.array(sample_weight, dtype=bool)
+            result = 0
 
-            bool_sample_weight = np.array(sample_weight, dtype=bool)
-            indices = y[bool_sample_weight]
-            indices = indices - indices[0]
-            y_pred_arr = y_pred[bool_sample_weight]
+            for i in range(len(n_split) - 1):
+                start = n_split[i]
+                end = n_split[i + 1]
 
-            indices_pointer = indices.ctypes.data_as(ctypes.POINTER(ctypes.c_int))
-            y_pred_arr_pointer = y_pred_arr.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+                _y_pred = np.array(y_pred[start:end])
 
-            result = reward_func(indices_pointer, y_pred_arr_pointer, len(indices), price_table_ptr, n_dim, 0)
+                _price_table = np.array(price_table[start:end])
+                _price_table_ptr = _price_table.ctypes.data_as(POINTER(c_double))
+
+                y_pred_arr = _y_pred
+                y_pred_arr_pointer = y_pred_arr.ctypes.data_as(POINTER(c_double))
+                indices = np.array(y[start:end])
+
+                indices = indices - indices[0]
+                indices_pointer = indices.ctypes.data_as(POINTER(c_int))
+                print("_price_table", _price_table)
+
+                input()
+
+                result += reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, -1)
+            print(result)
             return result
 
         return explicit_fitness
@@ -112,6 +135,7 @@ class YCGP:
                                      function_set=self.function_set,
                                      verbose=self.verbose, parsimony_coefficient=self.parsimony_coefficient)
 
+        print("x_data.shape[0]", x_data.shape[0])
         self.est.fit(x_data, np.arange(x_data.shape[0]))
 
         return self.est
