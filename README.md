@@ -4,14 +4,21 @@ Welcome to ycquant!
 
 Info
 -----------
+## Use virtualenv on windows
+make dir
+> mkdir env
+create your own virtualenv
+> virtualenv env --no-site-packages
+active virtualenv
+> env\Scripts\activate.bat
+install depended packages(some packages need to be installed manually on windows such as numpy+mkl)
+> pip install -r requirements.txt
+
+
+
 ## Important
 
-Simply install
-> pip install git+git://github.com/eggachecat/YCgplearn.git
-
-
-
-Modified gentic.py in gplearn as follows:
+I have modified gentic.py in gplearn as follows:
 
 changing the code block start at line 472 from:
 
@@ -32,3 +39,6 @@ to:
             self._program = self._programs[-1][np.argmin(fitness)]
 
 ```
+
+Or you can simply install
+> pip install git+git://github.com/eggachecat/YCgplearn.git
