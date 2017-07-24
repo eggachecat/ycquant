@@ -3,9 +3,9 @@ from ycquant.yc_plot import *
 from ycquant.yc_gp import *
 from ycquant.yc_libs import *
 
-DATA_PATH = "./data/product_01.train"
+DATA_PATH = "./data/product_01.test"
 
-MODEL_NAME = "1500874549"
+MODEL_NAME = "1500877093"
 
 
 def test_bar(y_pred):

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+import _pickle as cPickle
+
 
 def convert_price_to_binary(price_table):
     """
@@ -47,17 +49,24 @@ def read_unsupervised_data(data_path, header=None, sep=','):
     return x_data.as_matrix().astype(float), price.as_matrix().astype(float)
 
 
+def read_regression_data(data_path):
+    x_data, price = read_unsupervised_data(data_path)
+
+    return x_data[:len(price) - 1], price[1:]
+
+
 def read_classification_data(data_path):
-    """
-    Reading x_data and price-table which is not the target of the algorithm
-    :param data_path: str
-        data-table path
-    :return:
-    """
     x_data, price = read_unsupervised_data(data_path)
 
     return x_data[:len(price) - 1], convert_price_to_binary(price)
 
 
-def save_data_to(obj, file):
-    pass
+def save_model(model, file_path):
+    with open(file_path, "wb") as f:
+        cPickle.dump(model, f)
+
+
+def load_model(file_path):
+    with open(file_path, "rb") as f:
+        model = cPickle.load(f)
+    return model

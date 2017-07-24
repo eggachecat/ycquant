@@ -17,7 +17,7 @@ class YCGP:
     Gentic Programming Algorithm based on gplearn,
     which is able to handle changing target during the training (like reinforcement learning)
     """
-
+    _yc_gp = True
     def __init__(self, price_table, metric, n_dim=0, n_split=None):
         """
 
@@ -159,6 +159,9 @@ class YCGP:
         graph.write_png(plot_path)
 
         best_program.metric = None
+
+        setattr(best_program, "predict", best_program.execute)
+
         with open(model_path, "wb") as f:
             cPickle.dump(best_program, f)
 
@@ -178,6 +181,8 @@ class YCGP:
         for _program in _programs:
             if not _program is None:
                 _program.metric = None
+                setattr(_program, "predict", _program.execute)
+
                 __programs.append(_program)
 
         __programs = sorted(__programs, key=lambda x: x.fitness_, reverse=True)

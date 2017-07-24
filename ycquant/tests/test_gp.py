@@ -7,9 +7,7 @@ DATA_PATH = "./data/product_01.train"
 
 x_data, price_table = read_unsupervised_data(DATA_PATH, sep=',', header=None)
 metric = CrossBarStrategy
-print(x_data)
-print("----------")
-print(price_table, len(price_table))
+
 
 ts = int(time.time())
 
@@ -29,7 +27,7 @@ def test_best_result(y, y_pred):
 x_data, price_table = read_unsupervised_data(DATA_PATH)
 metric = CrossBarStrategy
 gp = YCGP(price_table, metric)
-gp.set_params(population_size=1000, generations=20, stopping_criteria=2000, parsimony_coefficient=0, max_samples=1.0)
+gp.set_params(population_size=1000, generations=20, stopping_criteria=2000000, parsimony_coefficient=50, max_samples=1.0)
 gp.fit(x_data)
 
 y = np.arange(x_data.shape[0])

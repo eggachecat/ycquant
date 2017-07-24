@@ -3,7 +3,45 @@ from ycquant.yc_plot import *
 from ycquant.yc_gp import *
 
 
-def compare_performance(performance_metric_matrix, label_list=None, dataset_label_list=None, save_file_path=None):
+def compare_performance_(est_list, file_name_list, dataset_label_list, model_name_list, use_price_table_list=True):
+    performance_metric_matrix = []
+    bm = YCBenchmark(CrossBarStrategy)
+
+    price_table_list = []
+
+    for i in range(len(file_name_list)):
+
+        file_name = file_name_list[i]
+
+        x_data, price_table = read_unsupervised_data(file_name)
+        price_table_list.append(price_table)
+        performance_metric_list = []
+
+        for est in est_list:
+
+            if hasattr(est, "_yc_perfect"):
+                y_pred = est.predict(price_table)
+                performance_metric_list.append(bm.bar_evaluate(price_table, y_pred))
+            elif hasattr(est, "_yc_gp"):
+                y_pred = est.predict(x_data)
+                performance_metric_list.append(bm.bar_evaluate(price_table, y_pred))
+            else:
+                # y_as_stock_price
+                stock_price_pred = est.predict(x_data)
+                y_pred_arr = -1 * (np.delete(stock_price_pred, [len(stock_price_pred) - 1]) - np.delete(stock_price_pred, [0]))
+                y_pred_arr[y_pred_arr == 0] = 1
+                performance_metric_list.append(bm.bar_evaluate(price_table, y_pred_arr))
+
+        performance_metric_matrix.append(performance_metric_list)
+
+    if not use_price_table_list:
+        price_table_list = None
+
+    compare_performance(performance_metric_matrix, label_list=model_name_list, dataset_label_list=dataset_label_list,
+                        price_table_list=price_table_list)
+
+
+def compare_performance(performance_metric_matrix, label_list=None, dataset_label_list=None, save_file_path=None, price_table_list=None):
     n_dataset = len(performance_metric_matrix)
     canvas = YCCanvas(shape=(3, n_dataset))
 
@@ -20,6 +58,7 @@ def compare_performance(performance_metric_matrix, label_list=None, dataset_labe
         if label_list is None:
             label_list = ["strategy-{n}".format(n=i) for i in range(n_strategies)]
 
+        print(len(label_list), n_strategies)
         if not len(label_list) == n_strategies:
             print("length of labels doesnot match that of y_pred_matrix")
             exit()
@@ -31,11 +70,16 @@ def compare_performance(performance_metric_matrix, label_list=None, dataset_labe
             cum_arr = np.cumsum(profit_arr)
             op_arr = performance_metric_arr[i]["op_arr"]
 
+            print(len(profit_arr), "n_dates", n_dates)
             canvas.draw_line_chart_2d(range(1, 1 + n_dates), profit_arr, label=label_list[i],
                                       sub_canvas_id=_sub_canvas_id)
             canvas.draw_square_function(op_arr * float(1 + i / n_strategies), label=label_list[i], sub_canvas_id=_sub_canvas_id + n_dataset * 1)
 
             canvas.draw_line_chart_2d(range(1, 1 + n_dates), cum_arr, label=label_list[i],
+                                      sub_canvas_id=_sub_canvas_id + n_dataset * 2)
+
+        if price_table_list is not None:
+            canvas.draw_line_chart_2d(range(1, 1 + n_dates), price_table_list[_], label="Buy and hold",
                                       sub_canvas_id=_sub_canvas_id + n_dataset * 2)
 
         canvas.set_title("Comparation of performance in dataset-{name}".format(name=dataset_label_list[_]), _sub_canvas_id)

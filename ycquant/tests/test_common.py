@@ -2,10 +2,10 @@ from ycquant.yc_libs import *
 from ycquant.yc_common import *
 from ycquant.yc_vote import *
 
-TRAIN_DATA_PATH = "./data/demo_data.train"
-TEST_DATA_PATH = "./data/demo_data.test"
+TRAIN_DATA_PATH = "./data/product_01.train"
+TEST_DATA_PATH = "./data/product_01.test"
 
-CONST_MODEL_NAME = "1500874549"
+CONST_MODEL_NAME = "1500876944"
 
 
 def test_compare_performance_with_benchmark(sample_size=1.0):
@@ -16,7 +16,7 @@ def test_compare_performance_with_benchmark(sample_size=1.0):
     bm = YCBenchmark(CrossBarStrategy)
 
     for file_name in [TRAIN_DATA_PATH, TEST_DATA_PATH]:
-        x_data, price_table = read_unsupervised_data(file_name)
+        x_data, price_table = read_unsupervised_data(file_name, sep=',', header=None)
 
         y_pred = prog.execute(x_data)
 
