@@ -7,10 +7,13 @@ Info
 ## Use virtualenv on windows
 make dir
 > mkdir env
+
 create your own virtualenv
 > virtualenv env --no-site-packages
+
 active virtualenv
 > env\Scripts\activate.bat
+
 install depended packages(some packages need to be installed manually on windows such as numpy+mkl)
 > pip install -r requirements.txt
 
