@@ -1,9 +1,7 @@
 from ycquant.yc_common import *
 from ycquant.yc_interpreter import *
 
-PATH_TO_DLL = "D:/sunao/workspace/cpp/GPQuant/x64/Release/GPQuant.dll"
-FITNESS_FUNC_KEY = "?get_reward@BarStrategy@BackTesting@GPQuant@@SANPEAHPEANH1HH@Z"
-CHEAT_FUNC_KEY = "?get_info@BarStrategy@BackTesting@GPQuant@@SAPEAUstrategy_info@3@PEAHPEANH1HH@Z"
+
 DATA_PATH = "./data/demo.csv"
 
 MODEL_NAME = "1500520500"

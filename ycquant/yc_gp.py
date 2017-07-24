@@ -41,7 +41,7 @@ class YCGP:
     def make_explict_func(self):
         n_dim = self.n_dim
         price_table_ptr = self.price_table_ptr
-        reward_func = self.metric.evluate_func
+        reward_func = self.metric.get_reward
 
         def explicit_fitness(y, y_pred, sample_weight):
             """
@@ -161,6 +161,8 @@ class YCGP:
                 _program.metric = None
                 __programs.append(_program)
 
+        __programs = sorted(__programs, key=lambda x: x.fitness_, reverse=True)
+
         with open(generation_path, "wb") as f:
             cPickle.dump(__programs, f)
 
@@ -177,7 +179,29 @@ class YCGP:
         if not os.path.exists(folder_path):
             print("Folder: {fd} not exists!!".format(fd=folder_path))
         model_path = "{fd}/model.pkl".format(fd=folder_path)
+        print("model_path", model_path)
 
         with open(model_path, "rb") as f:
+            model = cPickle.load(f)
+        return model
+
+    @staticmethod
+    def load_generation(folder_path):
+        """
+
+        :param folder_path:  str
+                where to save the best est
+        :return: program
+            program.execute(x_data) to get the predict
+        """
+
+        if not os.path.exists(folder_path):
+            print("Folder: {fd} not exists!!".format(fd=folder_path))
+
+        generation_path = "{fd}/generation.pkl".format(fd=folder_path)
+
+        print("generation_path", generation_path)
+
+        with open(generation_path, "rb") as f:
             model = cPickle.load(f)
         return model

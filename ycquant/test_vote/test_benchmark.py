@@ -1,19 +1,17 @@
 from ycquant.yc_benchmark import *
 from ycquant.yc_plot import *
 from ycquant.yc_gp import *
-from ycquant.yc_io import *
+from ycquant.yc_libs import *
 
-PATH_TO_DLL = "D:/sunao/workspace/cpp/GPQuant/x64/Release/GPQuant.dll"
-CHEAT_FUNC_KEY = "?get_info@BarStrategy@BackTesting@GPQuant@@SAPEAUstrategy_info@3@PEAHPEANH1HH@Z"
-DATA_PATH = "./data/demo.csv"
+DATA_PATH = "./data/demo_data"
 
-MODEL_NAME = "1500607339"
+MODEL_NAME = "1500860492"
 
 
 def test_bar(y_pred):
     x_data, price_table = read_unsupervised_data(DATA_PATH)
 
-    bm = YCBenchmark(CHEAT_FUNC_KEY, path_to_lib=PATH_TO_DLL)
+    bm = YCBenchmark(CrossBarStrategy)
 
     benchmark_info = bm.bar_evaluate(price_table)
     benchmark_cum_arr = np.cumsum(benchmark_info["profit_arr"])

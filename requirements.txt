@@ -1,0 +1,15 @@
+cycler==0.10.0
+-e  git+git://github.com/eggachecat/YCgplearn.git#egg=YCgplearn
+lightgbm==2.0.4
+matplotlib==2.0.2
+numpy==1.13.1+mkl
+pandas==0.20.3
+pydotplus==2.0.2
+pyparsing==2.2.0
+python-dateutil==2.6.1
+pytz==2017.2
+scikit-learn==0.18.2
+scipy==0.19.1
+six==1.10.0
+sklearn==0.0
+virtualenv==15.1.0
