@@ -66,7 +66,6 @@ class YCGP:
             :param sample_weight:
             :return:
             """
-            print("fuck off")
 
             y_pred[y_pred == 0] = 1
             # bool_sample_weight = np.array(sample_weight, dtype=bool)
@@ -87,12 +86,8 @@ class YCGP:
 
                 indices = indices - indices[0]
                 indices_pointer = indices.ctypes.data_as(POINTER(c_int))
-                print("_price_table", _price_table)
 
-                input()
-
-                result += reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, -1)
-            print(result)
+                result += reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, 0)
             return result
 
         return explicit_fitness
