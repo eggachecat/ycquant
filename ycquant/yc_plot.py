@@ -31,15 +31,14 @@ class YCCanvas:
     __makers = ["o", "s", "+", "<", ">", ".", ",", "v", "1", "2", "3", "4"]
 
     __line_styles = ["solid", "dashed", "dashdot", "dotted"]
-
     __shuffle_colors = [
-        "#000000", "#FF4A46", "#1CE6FF", "#FF34FF", "#FFEB3B", "#008941", "#006FA6", "#A30059",
+        "#000000", "#FF4A46", "#1CE6FF", "#FF34FF", "#B77B68", "#008941", "#006FA6", "#A30059",
         "#6A3A4C", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
         "#5A0007", "#809693", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80", "#92896B",
         "#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100",
         "#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F",
         "#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09",
-        "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66",
+        "#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#FFEB3B", "#7A87A1", "#788D66",
         "#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED", "#886F4C",
         "#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375", "#A3C8C9", "#FF913F", "#938A81",
         "#575329", "#00FECF", "#B05B6F", "#8CD0FF", "#3B9700", "#04F757", "#C8A1A1", "#1E6E00",
@@ -69,9 +68,11 @@ class YCCanvas:
         "#252F99", "#00CCFF", "#674E60", "#FC009C", "#92896B"
     ]
 
-    def __init__(self, figure_name=None, shape=(1, 1), dpi=100):
+    def __init__(self, figure_name=None, shape=(1, 1), dpi=100, figsize=None):
         self.canvasMap = {}
-        self.figure = plt.figure(dpi=dpi)
+        self.figure = plt.figure(dpi=dpi, figsize=figsize)
+        # self.figure.annotate(fontsize='xx-small')
+
         if figure_name:
             self.figure.canvas.set_window_title(figure_name)
         self.shape = shape
@@ -380,8 +381,10 @@ class YCCanvas:
 
     def set_legend(self, sub_canvas_id=1):
         ax = self.add_canvas(sub_canvas_id)
-        handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, labels)
+        # handles, labels = ax.get_legend_handles_labels()
+        # ax.legend(handles, labels)
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+                  fancybox=True, shadow=True, ncol=5)
 
     def set_title(self, title, sub_canvas_id=1):
         ax = self.add_canvas(sub_canvas_id)

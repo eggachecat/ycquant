@@ -3,7 +3,7 @@ from ycquant.yc_plot import *
 from ycquant.yc_gp import *
 
 
-def compare_performance_(est_list, file_name_list, dataset_label_list, model_name_list, use_price_table_list=True):
+def compare_performance_(est_list, file_name_list, dataset_label_list, model_name_list, use_price_table_list=True, save_file_path=None):
     performance_metric_matrix = []
     bm = YCBenchmark(CrossBarStrategy)
 
@@ -37,7 +37,7 @@ def compare_performance_(est_list, file_name_list, dataset_label_list, model_nam
     if not use_price_table_list:
         price_table_list = None
 
-    compare_performance(performance_metric_matrix, label_list=model_name_list, dataset_label_list=dataset_label_list,
+    compare_performance(performance_metric_matrix, label_list=model_name_list, dataset_label_list=dataset_label_list, save_file_path=save_file_path,
                         price_table_list=price_table_list)
 
 
@@ -82,7 +82,7 @@ def compare_performance(performance_metric_matrix, label_list=None, dataset_labe
             canvas.draw_line_chart_2d(range(1, 1 + n_dates), price_table_list[_], label="Buy and hold",
                                       sub_canvas_id=_sub_canvas_id + n_dataset * 2)
 
-        canvas.set_title("Comparation of performance in dataset-{name}".format(name=dataset_label_list[_]), _sub_canvas_id)
+        canvas.set_title("In dataset-{name}".format(name=dataset_label_list[_]), _sub_canvas_id)
 
         canvas.set_y_label("Profit", sub_canvas_id=_sub_canvas_id)
         canvas.set_y_label("Operation", sub_canvas_id=_sub_canvas_id + n_dataset * 1)

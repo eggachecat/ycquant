@@ -18,7 +18,8 @@ class YCGP:
     which is able to handle changing target during the training (like reinforcement learning)
     """
     _yc_gp = True
-    def __init__(self, price_table, metric, n_dim=0, n_split=None):
+
+    def __init__(self, price_table, metric, n_dim=0, n_split=None, reward_weight=None):
         """
 
         :param n_dim: int, default 0
@@ -32,8 +33,11 @@ class YCGP:
 
         if n_split is None:
             n_split = [0, len(price_table)]
+        if reward_weight is None:
+            reward_weight = [1]
 
         self.n_split = n_split
+        self.reward_weight = reward_weight
 
         self.n_dim = n_dim
         self.price_table = price_table
@@ -50,6 +54,7 @@ class YCGP:
         reward_func = self.metric.get_reward
         n_split = self.n_split
         price_table = self.price_table
+        reward_weight = self.reward_weight
 
         def explicit_fitness(y, y_pred, sample_weight):
             """
@@ -68,33 +73,58 @@ class YCGP:
             """
 
             y_pred[y_pred == 0] = 1
-            # bool_sample_weight = np.array(sample_weight, dtype=bool)
+            total_bool_sample_weight = np.array(sample_weight, dtype=bool)
             result = 0
+
+            # print("len", len(total_bool_sample_weight), "bool_sample_weight", total_bool_sample_weight)
+
+            total_data = n_split[-1] - n_split[0]
+            ratio = np.around(np.sum(total_bool_sample_weight) / total_data, decimals=1)
+            is_training_data = total_bool_sample_weight[0]
+
+            # print("total_data", total_data, "ratio", ratio)
 
             for i in range(len(n_split) - 1):
                 start = n_split[i]
                 end = n_split[i + 1]
-
+                n_data = int(ratio * (end - start))
+                # print("n_data", n_data)
                 _y_pred = np.array(y_pred[start:end])
-
                 _price_table = np.array(price_table[start:end])
+
+                # if is_training_data:
+                #     # first is True <=> training data
+                #     _y_pred = _y_pred[:n_data]
+                #     _price_table = _price_table[:n_data]
+                # else:
+                #     # else oob data
+                #     _y_pred = _y_pred[n_data:]
+                #     _price_table = _price_table[n_data:]
+
+                # _y_pred = np.array(y_pred[start:end])
+                y_pred_arr_pointer = _y_pred.ctypes.data_as(POINTER(c_double))
+
+                # _price_table = np.array(price_table[start:end])
                 _price_table_ptr = _price_table.ctypes.data_as(POINTER(c_double))
 
-                y_pred_arr = _y_pred
-                y_pred_arr_pointer = y_pred_arr.ctypes.data_as(POINTER(c_double))
-                indices = np.array(y[start:end])
+                if is_training_data:
+                    indices = np.array(range(n_data))
+                else:
+                    indices = np.array(range(end - n_data, end))
 
-                indices = indices - indices[0]
                 indices_pointer = indices.ctypes.data_as(POINTER(c_int))
 
-                result += reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, 0)
+                result += reward_weight[i] * reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, 0)
+            # print("============================")
+            # print("============================")
+            # print("============================")
+
             return result
 
         return explicit_fitness
 
     def set_params(self, population_size=500, generations=10, stopping_criteria=10, p_crossover=0.7, p_subtree_mutation=0.1,
                    p_hoist_mutation=0.05, p_point_mutation=0.1, verbose=1, parsimony_coefficient=0.01, function_set=None, max_samples=1.0):
-
         self.population_size = population_size
         self.generations = generations
         self.stopping_criteria = stopping_criteria
@@ -112,7 +142,6 @@ class YCGP:
         self.function_set = function_set
 
     def fit(self, x_data):
-
         if not hasattr(self, 'function_set'):
             print("Automatically initilizing....")
             self.set_params()
@@ -136,7 +165,6 @@ class YCGP:
         return self.est
 
     def predict(self, x_data):
-
         return self.est.predict(x_data)
 
     def save(self, folder_path, to_save_generation=True):
@@ -175,7 +203,6 @@ class YCGP:
             self.save_generation("{fd}/generation.pkl".format(fd=folder_path))
 
     def save_generation(self, generation_path):
-
         _programs = self.est._programs[0]
         __programs = []
         for _program in _programs:
