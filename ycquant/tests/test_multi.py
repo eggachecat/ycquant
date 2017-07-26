@@ -34,7 +34,7 @@ gp_2.save("outputs/exp_{suf}_2".format(suf=ts))
 
 split_list = [0, len(price_table_1), len(price_table_all)]
 reward_weight_list = [0.5, 0.5]
-gp_all = YCGP(price_table_all, metric, n_split=split_list, reward_weight=reward_weight_list)
+gp_all = YCGP(price_table_all, metric, split_list=split_list, reward_weight=reward_weight_list)
 gp_all.set_params(population_size=2000, generations=20, stopping_criteria=2000000, parsimony_coefficient=1000, max_samples=1.0)
 gp_all.fit(x_data_all)
 

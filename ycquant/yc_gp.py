@@ -3,13 +3,13 @@ import _pickle as cPickle
 from YCgplearn.genetic import SymbolicRegressor
 from YCgplearn.fitness import make_fitness
 
-import numpy as np
 import pydotplus
 
 from ycquant.yc_interpreter import *
 import os
 
-from ctypes import *
+# from ctypes import *
+from ycquant.yc_backtest import *
 
 
 class YCGP:
@@ -19,7 +19,7 @@ class YCGP:
     """
     _yc_gp = True
 
-    def __init__(self, price_table, metric, n_dim=0, n_split=None, reward_weight=None):
+    def __init__(self, price_table, strategy, split_list=None, reward_weight=None):
         """
 
         :param n_dim: int, default 0
@@ -31,93 +31,53 @@ class YCGP:
 
         """
 
-        if n_split is None:
-            n_split = [0, len(price_table)]
+        if split_list is None:
+            split_list = [0, len(price_table)]
         if reward_weight is None:
             reward_weight = [1]
 
-        self.n_split = n_split
+        self.split_list = split_list
         self.reward_weight = reward_weight
 
-        self.n_dim = n_dim
         self.price_table = price_table
-        self.price_table_ptr = self.price_table.ctypes.data_as(POINTER(c_double))
         self.len_price_table = len(price_table)
-        self.metric = metric
+        self.strategy = strategy
 
         self.explict_fiteness_func = self.make_explict_func()
         self.est = None
         self.max_samples = 1.0
 
     def make_explict_func(self):
-        n_dim = self.n_dim
-        reward_func = self.metric.get_reward
-        n_split = self.n_split
+
+        reward_func = self.strategy.get_reward
+        split_list = self.split_list
         price_table = self.price_table
         reward_weight = self.reward_weight
 
         def explicit_fitness(y, y_pred, sample_weight):
-            """
-
-            :param y: as indicies correspondint to _y_pred
-                    see fit() below
-                e.g.
-                    y = [2,5,7] and y_pred = [1.23, 2.34, 8.12]
-                    means:
-                        f(x[2]) = 1.23
-                        f(x[5]) = 2.34
-                        f(x[7]) = 8.12
-            :param y_pred:
-            :param sample_weight:
-            :return:
-            """
 
             y_pred[y_pred == 0] = 1
             total_bool_sample_weight = np.array(sample_weight, dtype=bool)
             result = 0
 
-            # print("len", len(total_bool_sample_weight), "bool_sample_weight", total_bool_sample_weight)
-
-            total_data = n_split[-1] - n_split[0]
+            total_data = split_list[-1] - split_list[0]
             ratio = np.around(np.sum(total_bool_sample_weight) / total_data, decimals=1)
             is_training_data = total_bool_sample_weight[0]
 
-            # print("total_data", total_data, "ratio", ratio)
-
-            for i in range(len(n_split) - 1):
-                start = n_split[i]
-                end = n_split[i + 1]
+            for i in range(len(split_list) - 1):
+                start = split_list[i]
+                end = split_list[i + 1]
                 n_data = int(ratio * (end - start))
-                # print("n_data", n_data)
+
                 _y_pred = np.array(y_pred[start:end])
                 _price_table = np.array(price_table[start:end])
-
-                # if is_training_data:
-                #     # first is True <=> training data
-                #     _y_pred = _y_pred[:n_data]
-                #     _price_table = _price_table[:n_data]
-                # else:
-                #     # else oob data
-                #     _y_pred = _y_pred[n_data:]
-                #     _price_table = _price_table[n_data:]
-
-                # _y_pred = np.array(y_pred[start:end])
-                y_pred_arr_pointer = _y_pred.ctypes.data_as(POINTER(c_double))
-
-                # _price_table = np.array(price_table[start:end])
-                _price_table_ptr = _price_table.ctypes.data_as(POINTER(c_double))
 
                 if is_training_data:
                     indices = np.array(range(n_data))
                 else:
                     indices = np.array(range(end - n_data, end))
 
-                indices_pointer = indices.ctypes.data_as(POINTER(c_int))
-
-                result += reward_weight[i] * reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, 0)
-            # print("============================")
-            # print("============================")
-            # print("============================")
+                result += reward_weight[i] * reward_func(_y_pred, _price_table, indices)
 
             return result
 
@@ -256,3 +216,77 @@ class YCGP:
         with open(generation_path, "rb") as f:
             model = cPickle.load(f)
         return model
+        #
+        # def make_explict_func_old(self):
+        #     n_dim = self.n_dim
+        #     reward_func = self.metric.get_reward
+        #     n_split = self.n_split
+        #     price_table = self.price_table
+        #     reward_weight = self.reward_weight
+        #
+        #     def explicit_fitness(y, y_pred, sample_weight):
+        #         """
+        #
+        #         :param y: as indicies correspondint to _y_pred
+        #                 see fit() below
+        #             e.g.
+        #                 y = [2,5,7] and y_pred = [1.23, 2.34, 8.12]
+        #                 means:
+        #                     f(x[2]) = 1.23
+        #                     f(x[5]) = 2.34
+        #                     f(x[7]) = 8.12
+        #         :param y_pred:
+        #         :param sample_weight:
+        #         :return:
+        #         """
+        #
+        #         y_pred[y_pred == 0] = 1
+        #         total_bool_sample_weight = np.array(sample_weight, dtype=bool)
+        #         result = 0
+        #
+        #         # print("len", len(total_bool_sample_weight), "bool_sample_weight", total_bool_sample_weight)
+        #
+        #         total_data = n_split[-1] - n_split[0]
+        #         ratio = np.around(np.sum(total_bool_sample_weight) / total_data, decimals=1)
+        #         is_training_data = total_bool_sample_weight[0]
+        #
+        #         # print("total_data", total_data, "ratio", ratio)
+        #
+        #         for i in range(len(n_split) - 1):
+        #             start = n_split[i]
+        #             end = n_split[i + 1]
+        #             n_data = int(ratio * (end - start))
+        #             # print("n_data", n_data)
+        #             _y_pred = np.array(y_pred[start:end])
+        #             _price_table = np.array(price_table[start:end])
+        #
+        #             # if is_training_data:
+        #             #     # first is True <=> training data
+        #             #     _y_pred = _y_pred[:n_data]
+        #             #     _price_table = _price_table[:n_data]
+        #             # else:
+        #             #     # else oob data
+        #             #     _y_pred = _y_pred[n_data:]
+        #             #     _price_table = _price_table[n_data:]
+        #
+        #             # _y_pred = np.array(y_pred[start:end])
+        #             y_pred_arr_pointer = _y_pred.ctypes.data_as(POINTER(c_double))
+        #
+        #             # _price_table = np.array(price_table[start:end])
+        #             _price_table_ptr = _price_table.ctypes.data_as(POINTER(c_double))
+        #
+        #             if is_training_data:
+        #                 indices = np.array(range(n_data))
+        #             else:
+        #                 indices = np.array(range(end - n_data, end))
+        #
+        #             indices_pointer = indices.ctypes.data_as(POINTER(c_int))
+        #
+        #             result += reward_weight[i] * reward_func(indices_pointer, y_pred_arr_pointer, len(indices), _price_table_ptr, n_dim, 0)
+        #         # print("============================")
+        #         # print("============================")
+        #         # print("============================")
+        #
+        #         return result
+        #
+        #     return explicit_fitness

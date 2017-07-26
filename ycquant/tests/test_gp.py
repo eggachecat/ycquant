@@ -1,13 +1,13 @@
 from ycquant.yc_gp import *
-from ycquant.yc_libs import *
+from ycquant.yc_backtest import *
+from ycquant.yc_io import *
 import time
 from ctypes import *
 
 DATA_PATH = "./data/product_01.train"
 
 x_data, price_table = read_unsupervised_data(DATA_PATH, sep=',', header=None)
-metric = CrossBarStrategy
-
+strategy = CrossBarStrategy
 
 ts = int(time.time())
 
@@ -20,13 +20,12 @@ def test_best_result(y, y_pred):
     indices_pointer = indices.ctypes.data_as(POINTER(c_int))
     y_pred_arr_pointer = y_pred_arr.ctypes.data_as(POINTER(c_double))
     price_table_ptr = price_table.ctypes.data_as(POINTER(c_double))
-    res = metric.get_reward(indices_pointer, y_pred_arr_pointer, len(indices), price_table_ptr, 0, 0)
-    print(res)
+    res = strategy.get_reward(indices_pointer, y_pred_arr_pointer, len(indices), price_table_ptr, 0, 0)
 
 
 x_data, price_table = read_unsupervised_data(DATA_PATH)
-metric = CrossBarStrategy
-gp = YCGP(price_table, metric)
+strategy = CrossBarStrategy
+gp = YCGP(price_table, strategy)
 gp.set_params(population_size=1000, generations=20, stopping_criteria=2000000, parsimony_coefficient=50, max_samples=1.0)
 gp.fit(x_data)
 
