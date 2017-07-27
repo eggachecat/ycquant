@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import os
 import _pickle as cPickle
 
 
@@ -62,6 +62,8 @@ def read_classification_data(data_path):
 
 
 def save_model(model, file_path):
+    if not os.path.exists(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
     with open(file_path, "wb") as f:
         cPickle.dump(model, f)
 

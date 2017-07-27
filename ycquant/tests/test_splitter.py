@@ -1,7 +1,7 @@
-from ycquant import yc_splitter
+from ycquant import yc_preprocessing
 
 
 def test_splitter():
-    yc_splitter.split_train_and_test("data/product_02", header=None, sep="  ")
+    yc_preprocessing.split_train_and_test("data/product_02", header=None, sep="  ")
 
 test_splitter()

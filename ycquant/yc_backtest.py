@@ -15,13 +15,15 @@ class CrossBarStrategy:
         investment = -1 * op_arr * price_table
         transcation_indicies = np.nonzero(investment)
 
-        if len(transcation_indicies) > 0:
+        transcation = investment[transcation_indicies]
+        if transcation.size > 0:
 
-            transcation = investment[transcation_indicies]
+            if not transcation.size % 2 == 0:
+                transcation[-1] = 0
+
             transcation_lag = np.roll(transcation, 1)
 
             _profit_arr = transcation + transcation_lag
-
             _profit_arr[0] = 0
 
             profit_arr = np.zeros(len(op_arr))
@@ -48,6 +50,12 @@ class CrossBarStrategy:
             print("profit_arr", profit_arr)
 
         return np.sum(profit_arr)
+
+    @staticmethod
+    def price_to_movement(price_table):
+        y_pred_arr = -1 * (np.delete(price_table, [len(price_table) - 1]) - np.delete(price_table, [0]))
+        y_pred_arr[y_pred_arr == 0] = 1
+        return y_pred_arr
 
     @staticmethod
     def get_info(prediction, price_table, indicies=None):

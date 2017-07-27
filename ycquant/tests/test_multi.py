@@ -1,7 +1,8 @@
-from ycquant.yc_splitter import *
-from ycquant.yc_common import *
+from ycquant.yc_preprocessing import *
+from ycquant.yc_performance import *
+from ycquant.yc_benchmark import *
 import time
-from ycquant.yc_vote import *
+from ycquant.yc_ensumble import *
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import GradientBoostingRegressor
 
@@ -72,12 +73,12 @@ perfect = YCPerfect()
 
 train_file_name_3, test_file_name_3 = split_train_and_test("data/product_03.csv", header=None, sep=",", split_ratio=1.0)
 
-compare_performance_([gp_1, gp_2, lr_1, lr_2, gbr_1, gbr_2, lr_all, gbr_all, gp_all, voter_1, voter_2, voter_all],
-                     [train_file_name_3],
-                     ["In Sample of data-3"],
-                     ["gp_1", "gp_2", "lr_1", "lr_2", "gbr_1", "gbr_2", "lr_all", "gbr_all", "gp_all", "v_1", "v_2", "v_all"],
-                     use_price_table_list=False,
-                     save_file_path="outputs/multi.png")
+compare_performance([gp_1, gp_2, lr_1, lr_2, gbr_1, gbr_2, lr_all, gbr_all, gp_all, voter_1, voter_2, voter_all],
+                    [train_file_name_3],
+                    ["In Sample of data-3"],
+                    ["gp_1", "gp_2", "lr_1", "lr_2", "gbr_1", "gbr_2", "lr_all", "gbr_all", "gp_all", "v_1", "v_2", "v_all"],
+                    use_price_table_list=False,
+                    save_file_path="outputs/multi.png")
 #
 # compare_performance_([perfect, gp_1, gp_2, lr_1, lr_2, gbr_1, gbr_2, lr_all, gbr_all, gp_all, voter_1, voter_2, voter_all],
 #                      [train_file_name_3],

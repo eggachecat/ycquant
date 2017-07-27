@@ -1,4 +1,4 @@
-from ycquant.yc_common import *
+from ycquant.yc_performance import *
 from ycquant.yc_interpreter import *
 
 
