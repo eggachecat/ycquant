@@ -56,7 +56,7 @@ class YCGP:
 
         def explicit_fitness(y, y_pred, sample_weight):
 
-            y_pred[y_pred == 0] = 1
+            y_pred[y_pred == 0] = 0.000001
             total_bool_sample_weight = np.array(sample_weight, dtype=bool)
             result = 0
 
@@ -83,7 +83,24 @@ class YCGP:
 
         return explicit_fitness
 
-    def set_params(self, population_size=500, generations=10, stopping_criteria=10, p_crossover=0.7, p_subtree_mutation=0.1,
+    def get_best_oob_est(self):
+
+        _programs = self.est._programs[0]
+        best_est = None
+        best_oob_fintess = 0
+        for _program in _programs:
+            if not _program is None:
+                if self.greater_is_better:
+                    if best_oob_fintess < _program.oob_fitness_:
+                        best_oob_fintess = _program.oob_fitness_
+                        best_est = _program
+                else:
+                    if best_oob_fintess > _program.oob_fitness_:
+                        best_oob_fintess = _program.oob_fitness_
+                        best_est = _program
+        return best_est
+
+    def set_params(self, population_size=500, generations=10, stopping_criteria=10, p_crossover=0.7, p_subtree_mutation=0.1, greater_is_better=True,
                    p_hoist_mutation=0.05, p_point_mutation=0.1, verbose=1, parsimony_coefficient=0.01, function_set=None, max_samples=1.0):
         self.population_size = population_size
         self.generations = generations
@@ -95,6 +112,7 @@ class YCGP:
         self.verbose = verbose
         self.parsimony_coefficient = parsimony_coefficient
         self.max_samples = max_samples
+        self.greater_is_better = greater_is_better
 
         if function_set is None:
             function_set = ['add', 'sub', 'mul', 'div', 'sin']
@@ -106,7 +124,7 @@ class YCGP:
             print("Automatically initilizing....")
             self.set_params()
 
-        metric = make_fitness(self.explict_fiteness_func, True)
+        metric = make_fitness(self.explict_fiteness_func, greater_is_better=self.greater_is_better)
 
         # here the random_state is set to be 223 to ensure
         # the cut-split not the sampling split

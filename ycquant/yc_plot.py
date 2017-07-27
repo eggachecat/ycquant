@@ -384,7 +384,7 @@ class YCCanvas:
         # handles, labels = ax.get_legend_handles_labels()
         # ax.legend(handles, labels)
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
-                  fancybox=True, shadow=True, ncol=5)
+                  fancybox=True, shadow=True, ncol=2)
 
     def set_title(self, title, sub_canvas_id=1):
         ax = self.add_canvas(sub_canvas_id)

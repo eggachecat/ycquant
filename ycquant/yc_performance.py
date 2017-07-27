@@ -18,7 +18,11 @@ def compare_performance(est_list, file_name_list, dataset_label_list, model_name
         performance_metric_list = []
 
         for est in est_list:
-            y_pred = est.predict(price_table)
+            if hasattr(est, "_yc_perfect"):
+                y_pred = est.predict(price_table)
+            else:
+                y_pred = est.predict(x_data)
+            print(type(est), len(y_pred), len(price_table))
             performance_metric_list.append(strategy.get_info(y_pred, price_table))
         performance_metric_matrix.append(performance_metric_list)
 
@@ -53,7 +57,10 @@ def compare_performance_plot(performance_metric_matrix, label_list=None, dataset
 
         for i in range(n_strategies):
             profit_arr = performance_metric_arr[i]["profit_arr"]
+            print(profit_arr)
             cum_arr = np.cumsum(profit_arr)
+            print(cum_arr)
+
             op_arr = performance_metric_arr[i]["op_arr"]
 
             print(len(profit_arr), "n_dates", n_dates)

@@ -1,5 +1,6 @@
 cycler==0.10.0
--e  git+git://github.com/eggachecat/YCgplearn.git#egg=YCgplearn
+Django==1.11.3
+html5lib==0.999999999
 lightgbm==2.0.4
 matplotlib==2.0.2
 numpy==1.13.1+mkl
@@ -13,3 +14,5 @@ scipy==0.19.1
 six==1.10.0
 sklearn==0.0
 virtualenv==15.1.0
+webencodings==0.5.1
+-e git://github.com/eggachecat/YCgplearn.git@9df539aa3eedc3ad0d6205349adaf00a580cdcc0#egg=YCgplearn

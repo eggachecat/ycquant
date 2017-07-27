@@ -8,7 +8,7 @@ def split_train_and_test(file_path, header=None, sep=',', split_ratio=0.8, data_
     if data_projection_list is None:
         data_projection_list = [i for i in range(56)]
         data_projection_list.append(len(df.columns) - 1)
-
+    print(data_projection_list)
     flag = int(split_ratio * len(df.index))
     df_projection = df[data_projection_list]
 

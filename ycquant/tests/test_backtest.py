@@ -1,20 +1,40 @@
 from ycquant.yc_backtest import *
 import numpy as np
 import unittest
+import pandas as pd
+import os
+
+script_dir = os.path.dirname(__file__)
 
 
 class TestCrossBarStrategy(unittest.TestCase):
+    # def test_get_op_arr(self):
+    #     file_path = "data/test_backtest"
+    #
+    #     abs_file_path = os.path.join(script_dir, file_path)
+    #     df = pd.read_csv(abs_file_path, header=None, sep="\t")
+    #
+    #     value_list = df[df.columns[0]].as_matrix()
+    #     op_arr_true = df[df.columns[2]].as_matrix()
+    #
+    #     op_arr_pred = CrossBarStrategy.get_op_arr(value_list)
+    #
+    #     assert np.array_equal(op_arr_true, op_arr_pred), "Error"
+
     def test_get_reward(self):
-        value_list = np.array([80, -32, -32, 38, -60, -6, -63, -114, -110, -94, -114, -96, 57])
-        price_table = np.array([6036, 5948, 5968, 6099, 6031, 6122, 6050, 5952, 5889, 5836, 5737, 5639, 5729])
+        file_path = "data/test_backtest"
 
-        indices_1 = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-        profit_1 = CrossBarStrategy.get_reward(value_list, price_table, np.array(indices_1))
-        self.assertEqual(profit_1, 83)
+        abs_file_path = os.path.join(script_dir, file_path)
+        df = pd.read_csv(abs_file_path, header=None, sep="\t")
 
-        indices_2 = np.array([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-        profit_2 = CrossBarStrategy.get_reward(value_list, price_table, np.array(indices_2))
-        self.assertEqual(profit_2, 234)
+        value_list = df[df.columns[0]].as_matrix()
+        price_table = df[df.columns[1]].as_matrix()
+        op_arr_true = df[df.columns[2]].as_matrix()
+
+        profit_arr = CrossBarStrategy.get_profit_by_op(op_arr_true, price_table)
+        profit = CrossBarStrategy.get_reward(value_list, price_table)
+
+        print(profit_arr, profit)
 
 
 if __name__ == '__main__':
