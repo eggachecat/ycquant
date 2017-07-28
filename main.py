@@ -27,7 +27,7 @@ class CrossBarStrategyShell:
 
 def main():
     ts = int(time.time())
-    file_path = "data/product_01"
+    file_path = "data/IC300POINT.txt"
 
     abs_file_path = os.path.join(script_dir, file_path)
 
@@ -43,23 +43,35 @@ def main():
     gp.fit(x_data)
     gp.save("outputs/exp_{suf}".format(suf=ts))
 
+    print(CrossBarStrategy.get_reward(gp.predict(x_data), price_table))
+
+    for _program in gp.est._programs[0]:
+        if _program is not None:
+            print(_program, _program.raw_fitness_, _program.fitness_)
+    print(gp.est._program, gp.est._program.raw_fitness_, gp.est._program.fitness_)
+
+    print("============")
+    new_model = load_model("outputs/exp_{suf}/model.pkl".format(suf=ts))
+    res = new_model.predict(x_data)
+    print(CrossBarStrategy.get_reward(res, price_table))
+
     # oob_gp = gp.get_best_oob_est()
     # formula = oob_gp.__str__()
     # mc_formula = YCInterpreter.mc_interprete(formula)
     # print("oob", mc_formula)
 
-    x_data_reg, y_reg = read_regression_data(train_file_name)
-
-    lr = CrossBarStrategyShell(LinearRegression())
-    lr.fit(x_data_reg, y_reg)
-
-    gbr = CrossBarStrategyShell(GradientBoostingRegressor())
-    gbr.fit(x_data_reg, y_reg)
+    # x_data_reg, y_reg = read_regression_data(train_file_name)
+    #
+    # lr = CrossBarStrategyShell(LinearRegression())
+    # lr.fit(x_data_reg, y_reg)
+    #
+    # gbr = CrossBarStrategyShell(GradientBoostingRegressor())
+    # gbr.fit(x_data_reg, y_reg)
 
     perfect = YCPerfect()
 
-    model_list = [perfect, gp, lr, gbr]
-    model_list_name = ["Perfect", "Genetic Programming", "Linear Regression", "Gradient Boosting Regression"]
+    model_list = [perfect, gp]
+    model_list_name = ["Perfect", "Genetic Programming"]
 
     # model_list = [perfect, gp]
     # model_list_name = ["Perfect", "Genetic Programming"]

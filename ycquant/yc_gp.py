@@ -10,6 +10,7 @@ import os
 
 # from ctypes import *
 from ycquant.yc_backtest import *
+import numpy as np
 
 
 class YCGP:
@@ -56,7 +57,7 @@ class YCGP:
 
         def explicit_fitness(y, y_pred, sample_weight):
 
-            y_pred[y_pred == 0] = 0.000001
+            y_pred[y_pred == 0] = 1
             total_bool_sample_weight = np.array(sample_weight, dtype=bool)
             result = 0
 
@@ -79,6 +80,17 @@ class YCGP:
 
                 result += reward_weight[i] * reward_func(_y_pred, _price_table, indices)
 
+                # if is_training_data:
+                #     print(indices)
+                #     op_arr = CrossBarStrategy.get_op_arr(y_pred)
+                #     profit_arr = CrossBarStrategy.get_profit_by_op(op_arr, price_table, indices)
+                #     print(np.sum(profit_arr))
+                #     print(result)
+                # for i in range(len(y_pred)):
+                #     print(y_pred[i], op_arr[i], _price_table[i], profit_arr[i])
+                #
+                # print(result, print(np.sum(profit_arr)))
+                # input()
             return result
 
         return explicit_fitness
@@ -100,7 +112,8 @@ class YCGP:
                         best_est = _program
         return best_est
 
-    def set_params(self, population_size=500, generations=10, stopping_criteria=10, p_crossover=0.7, p_subtree_mutation=0.1, greater_is_better=True,
+    def set_params(self, population_size=500, generations=10, tournament_size=20, stopping_criteria=10, p_crossover=0.7, p_subtree_mutation=0.1,
+                   greater_is_better=True,
                    p_hoist_mutation=0.05, p_point_mutation=0.1, verbose=1, parsimony_coefficient=0.01, function_set=None, max_samples=1.0):
         self.population_size = population_size
         self.generations = generations
@@ -113,6 +126,7 @@ class YCGP:
         self.parsimony_coefficient = parsimony_coefficient
         self.max_samples = max_samples
         self.greater_is_better = greater_is_better
+        self.tournament_size = tournament_size
 
         if function_set is None:
             function_set = ['add', 'sub', 'mul', 'div', 'sin']
@@ -129,7 +143,7 @@ class YCGP:
         # here the random_state is set to be 223 to ensure
         # the cut-split not the sampling split
 
-        self.est = SymbolicRegressor(population_size=self.population_size,
+        self.est = SymbolicRegressor(population_size=self.population_size, tournament_size=self.tournament_size,
                                      generations=self.generations, stopping_criteria=self.stopping_criteria,
                                      p_crossover=self.p_crossover, p_subtree_mutation=self.p_subtree_mutation,
                                      p_hoist_mutation=self.p_hoist_mutation, p_point_mutation=self.p_point_mutation,

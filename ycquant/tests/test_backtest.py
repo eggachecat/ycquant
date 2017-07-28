@@ -19,6 +19,8 @@ class TestCrossBarStrategy(unittest.TestCase):
     #
     #     op_arr_pred = CrossBarStrategy.get_op_arr(value_list)
     #
+    #     print(op_arr_pred)
+    #
     #     assert np.array_equal(op_arr_true, op_arr_pred), "Error"
 
     def test_get_reward(self):
@@ -34,7 +36,7 @@ class TestCrossBarStrategy(unittest.TestCase):
         profit_arr = CrossBarStrategy.get_profit_by_op(op_arr_true, price_table)
         profit = CrossBarStrategy.get_reward(value_list, price_table)
 
-        print(profit_arr, profit)
+        print(200 * profit_arr, 200 * profit)
 
 
 if __name__ == '__main__':

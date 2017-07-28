@@ -55,12 +55,15 @@ class CrossBarStrategy:
 
         investment = -1 * op_arr * price_table
 
-        if not investment.size % 2 == 0:
-            investment[-1] = 0
+        # if not investment.size % 2 == 0:
+        #     investment[-1] = 0
 
         transcation_indicies = np.nonzero(investment)
-
         transcation = investment[transcation_indicies]
+
+        if not transcation.size % 2 == 0:
+            transcation[-1] = transcation[-2]
+
         if transcation.size > 0:
 
             transcation_lag = np.roll(transcation, 1)
@@ -73,15 +76,16 @@ class CrossBarStrategy:
 
         else:
             profit_arr = np.zeros(len(op_arr))
-
+        # print(profit_arr)
         return profit_arr
 
     @staticmethod
     def get_reward(prediction, price_table, indicies=None, debug=False):
 
         if indicies is not None:
-            price_table = price_table[indicies]
             prediction = prediction[indicies]
+            price_table = price_table[indicies]
+
 
         op_arr = CrossBarStrategy.get_op_arr(prediction)
         profit_arr = CrossBarStrategy.get_profit_by_op(op_arr, price_table)

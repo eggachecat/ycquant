@@ -48,7 +48,7 @@ def compare_performance_plot(performance_metric_matrix, label_list=None, dataset
         if label_list is None:
             label_list = ["strategy-{n}".format(n=i) for i in range(n_strategies)]
 
-        print(len(label_list), n_strategies)
+        # print(len(label_list), n_strategies)
         if not len(label_list) == n_strategies:
             print("length of labels doesnot match that of y_pred_matrix")
             exit()
@@ -57,13 +57,13 @@ def compare_performance_plot(performance_metric_matrix, label_list=None, dataset
 
         for i in range(n_strategies):
             profit_arr = performance_metric_arr[i]["profit_arr"]
-            print(profit_arr)
+            # print(profit_arr)
             cum_arr = np.cumsum(profit_arr)
-            print(cum_arr)
+            # print(cum_arr)
 
             op_arr = performance_metric_arr[i]["op_arr"]
 
-            print(len(profit_arr), "n_dates", n_dates)
+            # print(len(profit_arr), "n_dates", n_dates)
             canvas.draw_line_chart_2d(range(1, 1 + n_dates), profit_arr, label=label_list[i],
                                       sub_canvas_id=_sub_canvas_id)
             canvas.draw_square_function(op_arr * float(1 + i / n_strategies), label=label_list[i], sub_canvas_id=_sub_canvas_id + n_dataset * 1)
